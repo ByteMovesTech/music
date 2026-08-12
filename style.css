@@ -53,9 +53,8 @@ textarea {
   padding: 28px 0 48px;
 }
 
-/* -----------------------------
-   HERO
------------------------------ */
+
+/* HERO */
 
 .hero {
   text-align: center;
@@ -96,7 +95,13 @@ textarea {
 }
 
 .hero h1 {
-  font-size: clamp(1.7rem, 5vw, 2.8rem);
+  font-size:
+    clamp(
+      1.7rem,
+      5vw,
+      2.8rem
+    );
+
   font-weight: 500;
 }
 
@@ -129,9 +134,8 @@ textarea {
   font-style: italic;
 }
 
-/* -----------------------------
-   SCREENS
------------------------------ */
+
+/* SCREENS */
 
 .screen {
   display: none;
@@ -141,9 +145,8 @@ textarea {
   display: block;
 }
 
-/* -----------------------------
-   CARDS
------------------------------ */
+
+/* CARDS */
 
 .card {
   background: rgba(21,29,50,.9);
@@ -175,9 +178,8 @@ textarea {
   line-height: 1.6;
 }
 
-/* -----------------------------
-   BUTTONS
------------------------------ */
+
+/* BUTTONS */
 
 .button-row {
   display: flex;
@@ -188,6 +190,15 @@ textarea {
   justify-content: center;
 
   margin-top: 22px;
+}
+
+.button-column {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+
+  margin-top: 24px;
 }
 
 button {
@@ -237,6 +248,12 @@ button:active {
   border: 1px solid var(--border);
 }
 
+.big-button {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.05rem;
+}
+
 .small {
   padding: 8px 12px;
   font-size: .9rem;
@@ -250,9 +267,8 @@ button:active {
   color: var(--muted);
 }
 
-/* -----------------------------
-   FORM
------------------------------ */
+
+/* FORM */
 
 label {
   display: block;
@@ -325,9 +341,64 @@ textarea {
   font-weight: 700;
 }
 
-/* -----------------------------
-   TOURNAMENT HEADER
------------------------------ */
+
+/* EXISTING TOURNAMENTS */
+
+.preset-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.preset-button {
+  width: 100%;
+
+  text-align: left;
+
+  padding: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #18223b,
+      #10182b
+    );
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 16px;
+
+  color: var(--text);
+}
+
+.preset-button:hover {
+  border-color: var(--accent);
+}
+
+.preset-name {
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.preset-description {
+  display: block;
+
+  margin-top: 5px;
+
+  color: var(--muted);
+
+  font-size: .9rem;
+}
+
+.loading {
+  color: var(--muted);
+  text-align: center;
+  padding: 20px;
+}
+
+
+/* TOURNAMENT HEADER */
 
 .tournament-header {
   display: grid;
@@ -353,9 +424,8 @@ textarea {
   color: var(--muted);
 }
 
-/* -----------------------------
-   PROGRESS
------------------------------ */
+
+/* PROGRESS */
 
 .progress-wrap {
   margin-bottom: 18px;
@@ -393,9 +463,8 @@ textarea {
     width .35s ease;
 }
 
-/* -----------------------------
-   SONG MATCHUP
------------------------------ */
+
+/* SONG MATCHUP */
 
 .matchup {
   display: grid;
@@ -487,9 +556,8 @@ textarea {
   font-size: 1.2rem;
 }
 
-/* -----------------------------
-   BRACKET
------------------------------ */
+
+/* BRACKET */
 
 .bracket-card {
   margin-top: 24px;
@@ -600,9 +668,8 @@ textarea {
   outline-offset: -2px;
 }
 
-/* -----------------------------
-   CHAMPION
------------------------------ */
+
+/* CHAMPION */
 
 .champion-card {
   max-width: 700px;
@@ -662,9 +729,8 @@ textarea {
   margin-top: 30px;
 }
 
-/* -----------------------------
-   FOOTER
------------------------------ */
+
+/* FOOTER */
 
 footer {
   text-align: center;
@@ -676,9 +742,8 @@ footer {
   padding: 0 0 28px;
 }
 
-/* -----------------------------
-   MOBILE
------------------------------ */
+
+/* MOBILE */
 
 @media (max-width: 650px) {
 
@@ -714,4 +779,4 @@ footer {
   .song-card {
     min-height: 165px;
   }
-                    }
+  }
