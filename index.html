@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <title>Mike & Jaclyn's Tournament of Tunes</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div class="music-note">♪</div>
+      <h1>Mike & Jaclyn's</h1>
+      <h2>Tournament of Tunes</h2>
+      <p>Because apparently we need to settle this.</p>
+    </header>
+
+    <section id="homeScreen" class="screen active">
+      <div class="card intro-card">
+        <h3>Ready to start a musical battle?</h3>
+        <p>Create a tournament from 16 or 32 songs, or load one of the JSON files you've saved.</p>
+        <div class="button-row">
+          <button class="primary" id="createBtn">Create Tournament</button>
+          <button class="secondary" id="loadBtn">Load Tournament</button>
+          <input type="file" id="fileInput" accept=".json,application/json" hidden>
+        </div>
+      </div>
+    </section>
+
+    <section id="createScreen" class="screen">
+      <div class="card">
+        <button class="back" id="backFromCreate">← Back</button>
+
+        <h3>Create Your Tournament</h3>
+
+        <label for="tournamentName">Tournament Name</label>
+        <input
+          id="tournamentName"
+          type="text"
+          maxlength="80"
+          placeholder="Mike & Jaclyn's 80s Rock Showdown"
+        >
+
+        <label>Number of Songs</label>
+
+        <div class="choice-row">
+          <button class="size-choice selected" data-size="16">
+            16 Songs
+          </button>
+
+          <button class="size-choice" data-size="32">
+            32 Songs
+          </button>
+        </div>
+
+        <label for="songText">Songs</label>
+
+        <p class="hint">
+          Enter one song per line using:
+          <strong>Song Title | YouTube URL</strong>
+        </p>
+
+        <textarea
+          id="songText"
+          placeholder="Stellar | https://www.youtube.com/watch?v=...
+Drive | https://www.youtube.com/watch?v=...
+Wish You Were Here | https://www.youtube.com/watch?v=..."
+        ></textarea>
+
+        <div id="songCount" class="song-count">
+          0 songs entered
+        </div>
+
+        <div class="button-row">
+          <button class="primary" id="buildBtn">
+            Build Tournament
+          </button>
+
+          <button class="secondary" id="demoBtn">
+            Use Demo Songs
+          </button>
+        </div>
+
+        <p id="createError" class="error"></p>
+      </div>
+    </section>
+
+    <section id="tournamentScreen" class="screen">
+
+      <div class="tournament-header">
+
+        <button class="back" id="quitBtn">
+          ← Exit
+        </button>
+
+        <div>
+          <h3 id="tournamentTitle"></h3>
+          <p id="roundLabel"></p>
+        </div>
+
+        <button class="secondary small" id="saveBtn">
+          Save JSON
+        </button>
+
+      </div>
+
+      <div class="progress-wrap">
+
+        <div id="progressText">
+          Matchup 1
+        </div>
+
+        <div class="progress-track">
+          <div id="progressBar"></div>
+        </div>
+
+      </div>
+
+      <div id="matchupArea"></div>
+
+      <div class="bracket-card card">
+
+        <div class="bracket-title">
+          <h3>Bracket</h3>
+
+          <button class="secondary small" id="toggleBracketBtn">
+            Hide
+          </button>
+        </div>
+
+        <div id="bracket"></div>
+
+      </div>
+
+    </section>
+
+    <section id="championScreen" class="screen">
+
+      <div class="champion-card">
+
+        <div class="trophy">
+          🏆
+        </div>
+
+        <p>
+          YOUR TOURNAMENT CHAMPION
+        </p>
+
+        <h2 id="championName"></h2>
+
+        <a
+          id="championYoutube"
+          class="youtube-link"
+          target="_blank"
+          rel="noopener"
+        >
+          ▶ Listen on YouTube
+        </a>
+
+        <div class="champion-actions">
+
+          <button class="primary" id="restartBtn">
+            Run It Again
+          </button>
+
+          <button class="secondary" id="newTournamentBtn">
+            New Tournament
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer>
+    <span>
+      Mike & Jaclyn's Tournament of Tunes
+    </span>
+  </footer>
+
+  <script src="app.js"></script>
+
+</body>
+  </html>
