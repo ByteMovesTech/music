@@ -12,6 +12,7 @@ const $ = id => document.getElementById(id);
 const screens = {
   home: $("homeScreen"),
   create: $("createScreen"),
+  existing: $("existingScreen"),
   tournament: $("tournamentScreen"),
   champion: $("championScreen")
 };
@@ -33,6 +34,7 @@ function showScreen(name) {
     top: 0,
     behavior: "smooth"
   });
+
 }
 
 
@@ -49,7 +51,29 @@ $("createBtn").addEventListener("click", () => {
 });
 
 
+$("playExistingBtn").addEventListener("click", () => {
+
+  showScreen("existing");
+
+  loadPresetList();
+
+});
+
+
+$("loadBtn").addEventListener("click", () => {
+
+  $("fileInput").click();
+
+});
+
+
 $("backFromCreate").addEventListener(
+  "click",
+  () => showScreen("home")
+);
+
+
+$("backFromExisting").addEventListener(
   "click",
   () => showScreen("home")
 );
@@ -62,14 +86,217 @@ $("quitBtn").addEventListener("click", () => {
       "Exit this tournament? Your current progress will be lost unless you saved it."
     )
   ) {
+
     showScreen("home");
+
   }
 
 });
 
 
 /* =========================================
-   TOURNAMENT SIZE
+   LOAD PRESET LIST
+========================================= */
+
+async function loadPresetList() {
+
+  const list = $("presetList");
+
+  const error = $("presetError");
+
+  list.innerHTML =
+    `<div class="loading">Loading tournaments...</div>`;
+
+  error.textContent = "";
+
+  try {
+
+    const response =
+      await fetch(
+        "tournaments/presets.json"
+      );
+
+    if (!response.ok) {
+
+      throw new Error(
+        `Could not find tournaments/presets.json`
+      );
+
+    }
+
+    const data =
+      await response.json();
+
+    if (
+      !data.tournaments ||
+      !Array.isArray(data.tournaments)
+    ) {
+
+      throw new Error(
+        "presets.json does not contain a tournaments list."
+      );
+
+    }
+
+    list.innerHTML = "";
+
+    data.tournaments.forEach(preset => {
+
+      const button =
+        document.createElement("button");
+
+      button.className =
+        "preset-button";
+
+      button.innerHTML = `
+
+        <span class="preset-name">
+          ${escapeHtml(preset.name)}
+        </span>
+
+        ${
+          preset.description
+            ? `
+              <span class="preset-description">
+                ${escapeHtml(
+                  preset.description
+                )}
+              </span>
+            `
+            : ""
+        }
+
+      `;
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          loadPreset(
+            preset.file
+          );
+
+        }
+      );
+
+      list.appendChild(button);
+
+    });
+
+    if (data.tournaments.length === 0) {
+
+      list.innerHTML =
+        `<div class="loading">
+          No tournaments have been added yet.
+        </div>`;
+
+    }
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    list.innerHTML = "";
+
+    $("presetError").textContent =
+      `Couldn't load the preset list. ${error.message}`;
+
+  }
+
+}
+
+
+/* =========================================
+   LOAD A PRESET TOURNAMENT
+========================================= */
+
+async function loadPreset(filename) {
+
+  try {
+
+    const response =
+      await fetch(
+        `tournaments/${encodeURIComponent(filename)}`
+      );
+
+    if (!response.ok) {
+
+      throw new Error(
+        `Could not find ${filename}`
+      );
+
+    }
+
+    const data =
+      await response.json();
+
+    validateTournament(data);
+
+    data.size =
+      data.songs.length;
+
+    startTournament(data);
+
+  }
+
+  catch (error) {
+
+    alert(
+      `Couldn't load this tournament.\n\n${error.message}`
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   VALIDATE TOURNAMENT
+========================================= */
+
+function validateTournament(data) {
+
+  if (
+    !data ||
+    !Array.isArray(data.songs)
+  ) {
+
+    throw new Error(
+      "This tournament doesn't contain a valid songs list."
+    );
+
+  }
+
+  if (
+    data.songs.length !== 16 &&
+    data.songs.length !== 32
+  ) {
+
+    throw new Error(
+      "A tournament must contain exactly 16 or 32 songs."
+    );
+
+  }
+
+  data.songs.forEach((song, index) => {
+
+    if (!song.title) {
+
+      throw new Error(
+        `Song ${index + 1} is missing a title.`
+      );
+
+    }
+
+  });
+
+}
+
+
+/* =========================================
+   CREATE TOURNAMENT
 ========================================= */
 
 document
@@ -81,7 +308,11 @@ document
       document
         .querySelectorAll(".size-choice")
         .forEach(btn => {
-          btn.classList.remove("selected");
+
+          btn.classList.remove(
+            "selected"
+          );
+
         });
 
       button.classList.add("selected");
@@ -95,10 +326,6 @@ document
 
   });
 
-
-/* =========================================
-   SONG PARSING
-========================================= */
 
 $("songText").addEventListener(
   "input",
@@ -114,7 +341,8 @@ function parseSongs(text) {
     .filter(Boolean)
     .map((line, index) => {
 
-      const parts = line.split("|");
+      const parts =
+        line.split("|");
 
       return {
 
@@ -127,7 +355,11 @@ function parseSongs(text) {
           parts[0].trim(),
 
         youtube:
-          (parts.slice(1).join("|") || "").trim()
+          (
+            parts
+              .slice(1)
+              .join("|") || ""
+          ).trim()
 
       };
 
@@ -140,17 +372,15 @@ function parseSongs(text) {
 function updateSongCount() {
 
   const count =
-    parseSongs($("songText").value).length;
+    parseSongs(
+      $("songText").value
+    ).length;
 
   $("songCount").textContent =
     `${count} song${count === 1 ? "" : "s"} entered`;
 
 }
 
-
-/* =========================================
-   DEMO SONGS
-========================================= */
 
 $("demoBtn").addEventListener("click", () => {
 
@@ -199,22 +429,21 @@ $("demoBtn").addEventListener("click", () => {
 });
 
 
-/* =========================================
-   BUILD TOURNAMENT
-========================================= */
-
 $("buildBtn").addEventListener("click", () => {
 
   const name =
-    $("tournamentName").value.trim() ||
+    $("tournamentName")
+      .value
+      .trim() ||
     "Mike & Jaclyn's Tournament of Tunes";
 
   const songs =
-    parseSongs($("songText").value);
+    parseSongs(
+      $("songText").value
+    );
 
   const error =
     $("createError");
-
 
   if (songs.length !== state.size) {
 
@@ -225,9 +454,7 @@ $("buildBtn").addEventListener("click", () => {
 
   }
 
-
   error.textContent = "";
-
 
   startTournament({
 
@@ -264,15 +491,15 @@ function shuffle(array) {
     [
       a[i],
       a[j]
-    ] =
-      [
-        a[j],
-        a[i]
-      ];
+    ] = [
+      a[j],
+      a[i]
+    ];
 
   }
 
   return a;
+
 }
 
 
@@ -291,17 +518,19 @@ function startTournament(tournament) {
 
   state.showBracket = true;
 
-
   const seeded =
-    shuffle(tournament.songs);
-
+    shuffle(
+      tournament.songs
+    );
 
   state.rounds = [
 
     {
 
       name:
-        roundName(tournament.size),
+        roundName(
+          tournament.size
+        ),
 
       matches:
         seeded.reduce(
@@ -310,13 +539,20 @@ function startTournament(tournament) {
             if (i % 2 === 0) {
 
               arr.push({
+
                 songs: [song],
+
                 winner: null
+
               });
 
-            } else {
+            }
 
-              arr[arr.length - 1]
+            else {
+
+              arr[
+                arr.length - 1
+              ]
                 .songs
                 .push(song);
 
@@ -332,9 +568,7 @@ function startTournament(tournament) {
 
   ];
 
-
   buildEmptyFutureRounds();
-
 
   showScreen("tournament");
 
@@ -350,17 +584,18 @@ function startTournament(tournament) {
 function buildEmptyFutureRounds() {
 
   let matchCount =
-    state.rounds[0].matches.length / 2;
-
+    state.rounds[0]
+      .matches.length / 2;
 
   while (matchCount >= 1) {
 
     const names =
-      roundNames(state.tournament.size);
+      roundNames(
+        state.tournament.size
+      );
 
     const nextIndex =
       state.rounds.length;
-
 
     state.rounds.push({
 
@@ -374,16 +609,20 @@ function buildEmptyFutureRounds() {
             length: matchCount
           },
           () => ({
+
             songs: [],
+
             winner: null
+
           })
         )
 
     });
 
-
     matchCount =
-      Math.floor(matchCount / 2);
+      Math.floor(
+        matchCount / 2
+      );
 
     if (matchCount === 0) {
       break;
@@ -403,7 +642,6 @@ function roundNames(size) {
   const names = [];
 
   let count = size;
-
 
   while (count >= 2) {
 
@@ -450,6 +688,7 @@ function roundNames(size) {
   }
 
   return names;
+
 }
 
 
@@ -469,16 +708,13 @@ function renderTournament() {
   const tournament =
     state.tournament;
 
-
   $("tournamentTitle").textContent =
     tournament.title;
-
 
   $("roundLabel").textContent =
     state.rounds[
       state.currentRound
     ].name;
-
 
   renderMatchup();
 
@@ -488,7 +724,7 @@ function renderTournament() {
 
 
 /* =========================================
-   RENDER CURRENT MATCH
+   RENDER MATCHUP
 ========================================= */
 
 function renderMatchup() {
@@ -503,14 +739,13 @@ function renderMatchup() {
       state.currentMatch
     ];
 
-
   const totalMatches =
     state.rounds.reduce(
       (sum, round) =>
-        sum + round.matches.length,
+        sum +
+        round.matches.length,
       0
     );
-
 
   const completedMatches =
     state.rounds
@@ -520,45 +755,51 @@ function renderMatchup() {
       )
       .reduce(
         (sum, round) =>
-          sum + round.matches.length,
+          sum +
+          round.matches.length,
         0
-      )
-      +
+      ) +
       state.currentMatch;
-
 
   $("progressText").textContent =
     `Matchup ${completedMatches + 1} of ${totalMatches}`;
 
-
   $("progressBar").style.width =
-    `${(completedMatches / totalMatches) * 100}%`;
-
+    `${(
+      completedMatches /
+      totalMatches
+    ) * 100}%`;
 
   if (
     !match ||
     match.songs.length < 2
   ) {
-    return;
-  }
 
+    return;
+
+  }
 
   $("matchupArea").innerHTML = `
 
     <div class="matchup">
 
-      ${songCard(match.songs[0], 0)}
+      ${songCard(
+        match.songs[0],
+        0
+      )}
 
       <div class="vs">
         VS
       </div>
 
-      ${songCard(match.songs[1], 1)}
+      ${songCard(
+        match.songs[1],
+        1
+      )}
 
     </div>
 
   `;
-
 
   document
     .querySelectorAll(".pick")
@@ -611,7 +852,6 @@ function songCard(song, index) {
         </span>
       `;
 
-
   return `
 
     <div class="song-card">
@@ -653,14 +893,11 @@ function chooseWinner(index) {
       state.currentMatch
     ];
 
-
   const winner =
     match.songs[index];
 
-
   match.winner =
     winner;
-
 
   match.songs.forEach(song => {
 
@@ -669,47 +906,34 @@ function chooseWinner(index) {
 
   });
 
-
   const nextRound =
     state.rounds[
       state.currentRound + 1
     ];
 
-
   if (!nextRound) {
 
-    finishTournament(winner);
+    finishTournament(
+      winner
+    );
 
     return;
 
   }
-
 
   const nextMatchIndex =
     Math.floor(
       state.currentMatch / 2
     );
 
-
-  if (
-    !nextRound.matches[
+  nextRound
+    .matches[
       nextMatchIndex
-    ].songs
-  ) {
-
-    nextRound.matches[
-      nextMatchIndex
-    ].songs = [];
-
-  }
-
-
-  nextRound.matches[
-    nextMatchIndex
-  ].songs[
-    state.currentMatch % 2
-  ] = winner;
-
+    ]
+    .songs[
+      state.currentMatch % 2
+    ] =
+      winner;
 
   advanceToNextMatch();
 
@@ -726,7 +950,6 @@ function advanceToNextMatch() {
     state.rounds[
       state.currentRound
     ];
-
 
   if (
     state.currentMatch <
@@ -745,7 +968,6 @@ function advanceToNextMatch() {
 
   }
 
-
   renderTournament();
 
 }
@@ -760,10 +982,8 @@ function finishTournament(winner) {
   $("championName").textContent =
     winner.title;
 
-
   const link =
     $("championYoutube");
-
 
   if (winner.youtube) {
 
@@ -782,7 +1002,6 @@ function finishTournament(winner) {
 
   }
 
-
   showScreen("champion");
 
 }
@@ -790,15 +1009,23 @@ function finishTournament(winner) {
 
 $("restartBtn").addEventListener(
   "click",
-  () => startTournament(
-    state.tournament
-  )
+  () => {
+
+    startTournament(
+      state.tournament
+    );
+
+  }
 );
 
 
 $("newTournamentBtn").addEventListener(
   "click",
-  () => showScreen("create")
+  () => {
+
+    showScreen("create");
+
+  }
 );
 
 
@@ -814,12 +1041,10 @@ $("toggleBracketBtn")
       state.showBracket =
         !state.showBracket;
 
-
       $("bracket").style.display =
         state.showBracket
           ? "block"
           : "none";
-
 
       $("toggleBracketBtn")
         .textContent =
@@ -843,7 +1068,10 @@ function renderBracket() {
 
       ${state.rounds
         .map(
-          (round, roundIndex) => `
+          (
+            round,
+            roundIndex
+          ) => `
 
             <div class="bracket-round">
 
@@ -918,10 +1146,8 @@ function bracketSong(
 
   }
 
-
   let classes =
     "bracket-song";
-
 
   if (
     winner &&
@@ -943,7 +1169,6 @@ function bracketSong(
 
   }
 
-
   if (
     roundIndex ===
       state.currentRound &&
@@ -956,12 +1181,13 @@ function bracketSong(
 
   }
 
-
   return `
 
     <div class="${classes}">
 
-      ${escapeHtml(song.title)}
+      ${escapeHtml(
+        song.title
+      )}
 
     </div>
 
@@ -993,14 +1219,15 @@ $("saveBtn").addEventListener(
             title,
             youtube
           }) => ({
+
             id,
             title,
             youtube
+
           })
         )
 
     };
-
 
     const blob =
       new Blob(
@@ -1017,14 +1244,15 @@ $("saveBtn").addEventListener(
         }
       );
 
-
     const url =
-      URL.createObjectURL(blob);
-
+      URL.createObjectURL(
+        blob
+      );
 
     const a =
-      document.createElement("a");
-
+      document.createElement(
+        "a"
+      );
 
     a.href = url;
 
@@ -1033,25 +1261,19 @@ $("saveBtn").addEventListener(
         state.tournament.title
       )}.json`;
 
-
     a.click();
 
-
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(
+      url
+    );
 
   }
 );
 
 
 /* =========================================
-   LOAD JSON
+   LOAD LOCAL JSON
 ========================================= */
-
-$("loadBtn").addEventListener(
-  "click",
-  () => $("fileInput").click()
-);
-
 
 $("fileInput").addEventListener(
   "change",
@@ -1060,11 +1282,9 @@ $("fileInput").addEventListener(
     const file =
       event.target.files[0];
 
-
     if (!file) {
       return;
     }
-
 
     try {
 
@@ -1073,26 +1293,16 @@ $("fileInput").addEventListener(
           await file.text()
         );
 
-
-      if (
-        !Array.isArray(data.songs) ||
-        ![16, 32].includes(
-          data.songs.length
-        )
-      ) {
-
-        throw new Error(
-          "A tournament must contain exactly 16 or 32 songs."
-        );
-
-      }
-
+      validateTournament(
+        data
+      );
 
       data.size =
         data.songs.length;
 
-
-      startTournament(data);
+      startTournament(
+        data
+      );
 
     }
 
@@ -1157,4 +1367,4 @@ function escapeAttr(str) {
 
   return escapeHtml(str);
 
-                              }
+        }
