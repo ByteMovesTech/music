@@ -1,1 +1,19 @@
-
+{
+  "tournaments": [
+    {
+      "name": "80s Dance",
+      "file": "game1.json",
+      "description": "The ultimate 80s dance song showdown."
+    },
+    {
+      "name": "Game 2",
+      "file": "game2.json",
+      "description": "Tournament coming soon."
+    },
+    {
+      "name": "Game 3",
+      "file": "game3.json",
+      "description": "Tournament coming soon."
+    }
+  ]
+}
